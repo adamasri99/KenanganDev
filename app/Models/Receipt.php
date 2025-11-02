@@ -14,11 +14,30 @@ class Receipt extends Model
     
     protected $fillable = [
         'roi_record_id',
-        'file_path'
+        'file_path',
+        'vendor_name',
+        'description',
+        'amount',
+        'category',
+        'receipt_date',
+        'receipt_image'
     ];
 
     public function roiRecord()
     {
         return $this->belongsTo(RoiRecord::class);
+    }
+
+    public function getCategoryColor()
+    {
+        $colors = [
+            'food' => 'success',
+            'transport' => 'info',
+            'utilities' => 'warning',
+            'supplies' => 'primary',
+            'other' => 'secondary'
+        ];
+        
+        return $colors[$this->category] ?? 'secondary';
     }
 }

@@ -306,6 +306,41 @@
                                 </div>
                             </div>
                             @endif
+
+                            {{-- Delete Confirmation Modal --}}
+                            <div class="modal fade" id="deleteModal{{ $record->id }}" tabindex="-1" 
+                                 aria-labelledby="deleteModalLabel{{ $record->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-gradient-danger">
+                                            <h5 class="modal-title text-white" id="deleteModalLabel{{ $record->id }}">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" 
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="text-center py-3">
+                                                <i class="fas fa-trash-alt text-danger" style="font-size: 3rem;"></i>
+                                                <h5 class="mt-3 mb-2">Delete "{{ $record->product->name }}" record?</h5>
+                                                <p class="text-muted mb-0">This action cannot be undone. Are you sure you want to delete this ROI record?</p>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                            <form action="{{ url('ROI-management/' . $record->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash-alt me-1"></i>Yes, Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center">

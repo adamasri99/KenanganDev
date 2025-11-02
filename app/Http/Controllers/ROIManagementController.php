@@ -67,4 +67,12 @@ class ROIManagementController extends Controller
         $products = \App\Models\Product::all();
         return view('laravel-examples.ROI calculation.ROI_edit', compact('roi', 'products'));
     }
+
+    public function destroy($id)
+    {
+        $roiRecord = \App\Models\RoiRecord::findOrFail($id);
+        $roiRecord->delete();
+        
+        return redirect('ROI-management')->with('success', 'ROI record deleted successfully!');
+    }
 }

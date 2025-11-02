@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InfoUserController;
 use App\Http\Controllers\ProductManagementController;
+use App\Http\Controllers\ReceiptManagementController;
 use App\Http\Controllers\ROIManagementController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ResetController;
@@ -58,6 +59,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('ROI-management/create', [App\Http\Controllers\ROIManagementController::class, 'create']);
 	Route::post('ROI-management/store', [ROIManagementController::class, 'store']);
 	Route::get('ROI-management/edit/{id}', [ROIManagementController::class, 'edit']);
+	Route::delete('ROI-management/{id}', [ROIManagementController::class, 'destroy'])->name('roi-management.destroy');
+
+	Route::resource('receipt-management', ReceiptManagementController::class);
 
 
 
