@@ -59,9 +59,14 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('ROI-management/create', [App\Http\Controllers\ROIManagementController::class, 'create']);
 	Route::post('ROI-management/store', [ROIManagementController::class, 'store']);
 	Route::get('ROI-management/edit/{id}', [ROIManagementController::class, 'edit']);
+	Route::put('ROI-management/{id}', [ROIManagementController::class, 'update']);
 	Route::delete('ROI-management/{id}', [ROIManagementController::class, 'destroy'])->name('roi-management.destroy');
 
 	Route::resource('receipt-management', ReceiptManagementController::class);
+	Route::get('receipt-management/show/{id}', [ReceiptManagementController::class, 'show']);
+	Route::get('receipt-management/edit/{id}', [ReceiptManagementController::class, 'edit']);
+	Route::put('receipt-management/update/{id}', [ReceiptManagementController::class, 'update']);
+	Route::delete('receipt-management/destroy/{id}', [ReceiptManagementController::class, 'destroy']);
 
 
 

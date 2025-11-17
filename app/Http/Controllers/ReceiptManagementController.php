@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Receipt;
 
 class ReceiptManagementController extends Controller
 {
@@ -12,7 +13,7 @@ class ReceiptManagementController extends Controller
         $monthlyCount = \App\Models\Receipt::whereMonth('created_at', now()->month)->count();
         $totalAmount = \App\Models\Receipt::sum('amount');
         $categoryCount = \App\Models\Receipt::distinct('category')->count();
-        
+
         return view('laravel-examples.Receipt management.Receipt_management', compact('receipts', 'monthlyCount', 'totalAmount', 'categoryCount'));
     }
 
@@ -23,31 +24,59 @@ class ReceiptManagementController extends Controller
 
     public function store(Request $request)
     {
-        // Store logic here
+        // In your controller store/update method
+        if ($request->hasFile('receipt_images')) {
+            foreach ($request->file('receipt_images') as $index => $file) {
+                if ($file) {
+                    $path = $file->store('receipts', 'public');
+
+                    Receipt::create([
+                        'roi_record_id' => $roi->id,
+                        'file_path' => $path,
+                        'receipt_image' => $path,
+                        'receipt_date' => $request->receipt_dates[$index] . '-01',
+                    ]);
+                }
+            }
+        }
     }
 
     public function show($id)
     {
         $receipt = \App\Models\Receipt::findOrFail($id);
-        return view('laravel-examples.receipt-management.show', compact('receipt'));
+        return view('laravel-examples.Receipt management.Receipt_show', compact('receipt'));
     }
 
     public function edit($id)
     {
         $receipt = \App\Models\Receipt::findOrFail($id);
-        return view('laravel-examples.receipt-management.edit', compact('receipt'));
+        return view('laravel-examples.Receipt management.Receipt_edit', compact('receipt'));
     }
 
     public function update(Request $request, $id)
     {
-        // Update logic here
+        $request->validate([
+            'vendor_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'category' => 'required|string',
+            'receipt_date' => 'required|date',
+            'description' => 'nullable|string'
+        ]);
+
+        $receipt = \App\Models\Receipt::findOrFail($id);
+        $receipt->update($request->all());
+
+        return redirect('receipt-management')->with('success', 'Receipt updated successfully!');
     }
 
     public function destroy($id)
     {
         $receipt = \App\Models\Receipt::findOrFail($id);
+        if ($receipt->receipt_image) {
+            \Storage::disk('public')->delete($receipt->receipt_image);
+        }
         $receipt->delete();
-        
-        return redirect()->route('receipt-management.index')->with('success', 'Receipt deleted successfully!');
+
+        return redirect('receipt-management')->with('success', 'Receipt deleted successfully!');
     }
 }

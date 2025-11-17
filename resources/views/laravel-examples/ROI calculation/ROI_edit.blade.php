@@ -44,7 +44,7 @@
             </div>
             <div class="card-body pt-4 p-3">
                 
-                <form action="{{ isset($roi) ? url('ROI-management/update/' . $roi->id) : url('ROI-management/store') }}" method="POST" enctype="multipart/form-data" id="roiForm">
+                <form action="{{ isset($roi) ? url('ROI-management/' . $roi->id) : url('ROI-management/store') }}" method="POST" enctype="multipart/form-data" id="roiForm">
                     @csrf
                     @if(isset($roi))
                         @method('PUT')

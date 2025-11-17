@@ -26,13 +26,6 @@
                         </p>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
-                    <div class="nav-wrapper position-relative end-0">
-                        <a href="{{ url('receipt-management/create') }}" class="btn bg-gradient-primary w-100">
-                            <i class="fas fa-plus me-2"></i>{{ __('Add New Receipt') }}
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -249,17 +242,20 @@
                     <table class="table align-items-center mb-0">
                         <thead>
                             <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Receipt Info</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Category</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amount</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Image</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($receipts as $receipt)
+                            @forelse($receipts as $index => $receipt)
                                 <tr>
+                                    <td class="align-middle text-center">
+                                        <span class="text-secondary text-xs font-weight-bold">{{ $receipts->firstItem() + $index }}</span>
+                                    </td>
                                     <td>
                                         <div class="d-flex px-2 py-1">
                                             <div>
@@ -282,46 +278,36 @@
                                         <span class="text-secondary text-sm font-weight-bold">RM {{ number_format($receipt->amount ?? 0, 2) }}</span>
                                     </td>
                                     <td class="align-middle text-center">
-                                        <span class="text-secondary text-xs font-weight-bold">{{ $receipt->receipt_date ? \Carbon\Carbon::parse($receipt->receipt_date)->format('d M Y') : 'N/A' }}</span>
+                                        <span class="text-secondary text-xs font-weight-bold">
+                                            {{ $receipt->receipt_date ? \Carbon\Carbon::parse($receipt->receipt_date)->format('d M Y') : 'N/A' }}
+                                        </span>
                                     </td>
                                     <td class="align-middle text-center">
-                                        @if($receipt->receipt_image)
-                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#imageModal{{ $receipt->id }}">
-                                                <i class="fas fa-image"></i> View
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <a href="{{ url('receipt-management/show/' . $receipt->id) }}" 
+                                               class="btn btn-sm btn-info mb-0" 
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top" 
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url('receipt-management/edit/' . $receipt->id) }}" 
+                                               class="btn btn-sm btn-warning mb-0" 
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top" 
+                                               title="Edit Receipt">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger mb-0" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal{{ $receipt->id }}" 
+                                                    title="Delete Receipt">
+                                                <i class="fas fa-trash"></i>
                                             </button>
-                                        @else
-                                            <span class="text-xs text-secondary">No image</span>
-                                        @endif
-                                    </td>
-                                    <td class="align-middle text-center">
-                                        <a href="{{ url('receipt-management/show/' . $receipt->id) }}" class="btn btn-link text-info px-2 mb-0" data-bs-toggle="tooltip" title="View Details">
-                                            <i class="fas fa-eye text-info"></i>
-                                        </a>
-                                        <a href="{{ url('receipt-management/edit/' . $receipt->id) }}" class="btn btn-link text-dark px-2 mb-0" data-bs-toggle="tooltip" title="Edit">
-                                            <i class="fas fa-pencil-alt text-dark"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-link text-danger px-2 mb-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $receipt->id }}" title="Delete">
-                                            <i class="fas fa-trash text-danger"></i>
-                                        </button>
+                                        </div>
                                     </td>
                                 </tr>
-
-                                {{-- Image Modal --}}
-                                @if($receipt->receipt_image)
-                                    <div class="modal fade" id="imageModal{{ $receipt->id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Receipt Image - {{ $receipt->vendor_name }}</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body text-center">
-                                                    <img src="{{ asset('storage/' . $receipt->receipt_image) }}" alt="Receipt" class="img-fluid rounded">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
 
                                 {{-- Delete Modal --}}
                                 <div class="modal fade" id="deleteModal{{ $receipt->id }}" tabindex="-1" aria-hidden="true">
@@ -333,7 +319,9 @@
                                             </div>
                                             <div class="modal-body">
                                                 <p>Are you sure you want to delete this receipt?</p>
-                                                <p class="text-sm text-secondary mb-0"><strong>{{ $receipt->vendor_name }}</strong> - RM {{ number_format($receipt->amount ?? 0, 2) }}</p>
+                                                <p class="text-sm text-secondary mb-0">
+                                                    <strong>{{ $receipt->vendor_name }}</strong> - RM {{ number_format($receipt->amount ?? 0, 2) }}
+                                                </p>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

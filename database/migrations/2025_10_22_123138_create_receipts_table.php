@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('receipts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('roi_record_id');
-            $table->string('file_path');
+            $table->string('file_path')->nullable();
             $table->timestamps();
             $table->softDeletes();
             
