@@ -22,25 +22,6 @@ class ReceiptManagementController extends Controller
         return view('laravel-examples.receipt-management.create');
     }
 
-    public function store(Request $request)
-    {
-        // In your controller store/update method
-        if ($request->hasFile('receipt_images')) {
-            foreach ($request->file('receipt_images') as $index => $file) {
-                if ($file) {
-                    $path = $file->store('receipts', 'public');
-
-                    Receipt::create([
-                        'roi_record_id' => $roi->id,
-                        'file_path' => $path,
-                        'receipt_image' => $path,
-                        'receipt_date' => $request->receipt_dates[$index] . '-01',
-                    ]);
-                }
-            }
-        }
-    }
-
     public function show($id)
     {
         $receipt = \App\Models\Receipt::findOrFail($id);

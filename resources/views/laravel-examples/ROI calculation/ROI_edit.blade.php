@@ -143,57 +143,125 @@
                     </div>
 
                     {{-- Step 2: Upload Receipt Images --}}
-                    <div class="card bg-gradient-light mb-4">
-                        <div class="card-body">
-                            <h6 class="text-dark mb-3">
-                                <i class="fas fa-receipt me-2"></i>Step 2: Upload Receipt Images (Optional)
-                            </h6>
-                            
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="receipt-images" class="form-control-label">{{ __('Receipt Images') }} <span class="text-muted">(Multiple files allowed)</span></label>
-                                        <div class="@error('receipt_images.*') border border-danger rounded-3 @enderror">
-                                            <input 
-                                                class="form-control" 
-                                                type="file" 
-                                                id="receipt-images" 
-                                                name="receipt_images[]"
-                                                accept="image/*"
-                                                multiple
-                                            >
-                                            <small class="text-muted d-block mt-1">
-                                                <i class="fas fa-info-circle"></i> You can select multiple images at once. Supported formats: JPG, PNG, PDF
-                                            </small>
-                                            @error('receipt_images.*')
-                                                <p class="text-danger text-xs mt-2">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
+                        <div class="card bg-gradient-light mb-4">
+                            <div class="card-body">
+                                <h6 class="text-dark mb-3">
+                                    <i class="fas fa-receipt me-2"></i>Step 2: Upload Receipt Images (Optional)
+                                </h6>
 
-                                    {{-- Image Preview --}}
-                                    <div id="image-preview" class="mt-3 d-none">
-                                        <label class="form-control-label">{{ __('Preview:') }}</label>
-                                        <div id="preview-container" class="d-flex flex-wrap gap-2"></div>
-                                    </div>
+                                <div id="receipts-container"> 
+                                    {{-- Existing receipts if editing --}}
+                                    @if (isset($roi) && $roi->receipts && $roi->receipts->count() > 0)
+                                        @foreach ($roi->receipts as $index => $receipt)
+                                            <div class="receipt-item mb-3" data-index="{{ $index }}">
+                                                <div class="border rounded-3 p-3 bg-white position-relative">
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-receipt">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
 
-                                    {{-- Show existing images if editing --}}
-                                    @if(isset($roi) && $roi->receipt_images)
-                                        <div class="mt-3">
-                                            <label class="form-control-label">{{ __('Current Receipt Images:') }}</label>
-                                            <div class="d-flex flex-wrap gap-2">
-                                                @foreach(json_decode($roi->receipt_images) as $image)
-                                                    <div class="position-relative">
-                                                        <img src="{{ asset('storage/' . $image) }}" alt="Receipt" class="border rounded" style="width: 120px; height: 120px; object-fit: cover;">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-6">
+                                                            <label
+                                                                class="form-control-label">{{ __('Receipt Image') }}</label>
+                                                            <input class="form-control" type="file"
+                                                                name="receipt_images[{{ $index }}]"
+                                                                accept="image/*,application/pdf">
+                                                            <small class="text-muted d-block mt-1">
+                                                                <i class="fas fa-info-circle"></i> Supported formats: JPG,
+                                                                PNG, PDF
+                                                            </small>
+
+                                                            @if ($receipt->receipt_image)
+                                                                <div class="mt-2">
+                                                                    <small class="text-muted">Current image:</small>
+                                                                    @if (pathinfo($receipt->receipt_image, PATHINFO_EXTENSION) === 'pdf')
+                                                                        <a href="{{ asset('storage/' . $receipt->receipt_image) }}"
+                                                                            target="_blank" class="d-block">
+                                                                            <i class="fas fa-file-pdf text-danger"></i>
+                                                                            View PDF
+                                                                        </a>
+                                                                    @else
+                                                                        <img src="{{ asset('storage/' . $receipt->receipt_image) }}"
+                                                                            alt="Receipt" class="border rounded mt-1"
+                                                                            style="width: 100px; height: 100px; object-fit: cover;">
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label
+                                                                class="form-control-label">{{ __('Receipt Month') }}</label>
+                                                            <input class="form-control" type="month"
+                                                                name="receipt_dates[{{ $index }}]"
+                                                                value="{{ $receipt->receipt_date ? \Carbon\Carbon::parse($receipt->receipt_date)->format('Y-m') : '' }}"
+                                                                required>
+                                                            <input type="hidden" name="receipt_ids[{{ $index }}]"
+                                                                value="{{ $receipt->id }}">
+                                                        </div>
                                                     </div>
-                                                @endforeach
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endforeach
                                     @endif
                                 </div>
+
+                                <button type="button" id="add-receipt-btn" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i> Add Receipt
+                                </button>
                             </div>
                         </div>
-                    </div>
+
+                        <script>
+                            function createReceiptTemplate(index) {
+                                return `
+                                    <div class="border rounded-3 p-3 bg-white position-relative">
+                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-receipt">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <label class="form-control-label">{{ __('Receipt Image') }}</label>
+                                                <input class="form-control" type="file" name="receipt_images[${index}]" accept="image/*,application/pdf" required>
+                                                <small class="text-muted d-block mt-1"><i class="fas fa-info-circle"></i> Supported formats: JPG, PNG, PDF</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-control-label">{{ __('Receipt Month') }}</label>
+                                                <input class="form-control" type="month" name="receipt_dates[${index}]" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                let receiptIndex = {{ isset($roi) && $roi->receipts ? $roi->receipts->count() : 0 }};
+
+                                document.getElementById('add-receipt-btn').addEventListener('click', function() {
+                                    const container = document.getElementById('receipts-container');
+                                    const receiptItem = document.createElement('div');
+                                    receiptItem.className = 'receipt-item mb-3';
+                                    receiptItem.dataset.index = receiptIndex;
+                                    receiptItem.innerHTML = createReceiptTemplate(receiptIndex);
+
+                                    container.appendChild(receiptItem);
+                                    receiptIndex++;
+
+                                    receiptItem.querySelector('.remove-receipt').addEventListener('click', function() {
+                                        receiptItem.remove();
+                                    });
+                                });
+
+                                document.querySelectorAll('.remove-receipt').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        if (confirm('Are you sure you want to remove this receipt?')) {
+                                            this.closest('.receipt-item').remove();
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
 
                     {{-- Step 3: Enter Expenses --}}
                     <div class="card bg-gradient-light mb-4">

@@ -53,6 +53,7 @@ class ROIManagementController extends Controller
                 
                 \App\Models\Receipt::create([
                     'roi_record_id' => $roiRecord->id,
+                    'file_path' => 'receipts/' . $fileName,
                     'receipt_image' => 'receipts/' . $fileName,
                     'receipt_date' => isset($request->receipt_dates[$index]) ? $request->receipt_dates[$index] . '-01' : null
                 ]);
@@ -101,6 +102,7 @@ class ROIManagementController extends Controller
                 
                 \App\Models\Receipt::create([
                     'roi_record_id' => $roiRecord->id,
+                    'file_path' => 'receipts/' . $fileName,
                     'receipt_image' => 'receipts/' . $fileName,
                     'receipt_date' => isset($request->receipt_dates[$index]) ? $request->receipt_dates[$index] . '-01' : null
                 ]);

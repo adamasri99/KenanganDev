@@ -147,7 +147,7 @@
                                     <i class="fas fa-receipt me-2"></i>Step 2: Upload Receipt Images (Optional)
                                 </h6>
 
-                                <div id="receipts-container">
+                                <div id="receipts-container"> 
                                     {{-- Existing receipts if editing --}}
                                     @if (isset($roi) && $roi->receipts && $roi->receipts->count() > 0)
                                         @foreach ($roi->receipts as $index => $receipt)
@@ -212,60 +212,45 @@
                         </div>
 
                         <script>
+                            function createReceiptTemplate(index) {
+                                return `
+                                    <div class="border rounded-3 p-3 bg-white position-relative">
+                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-receipt">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <label class="form-control-label">{{ __('Receipt Image') }}</label>
+                                                <input class="form-control" type="file" name="receipt_images[${index}]" accept="image/*,application/pdf" required>
+                                                <small class="text-muted d-block mt-1"><i class="fas fa-info-circle"></i> Supported formats: JPG, PNG, PDF</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-control-label">{{ __('Receipt Month') }}</label>
+                                                <input class="form-control" type="month" name="receipt_dates[${index}]" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
                             document.addEventListener('DOMContentLoaded', function() {
                                 let receiptIndex = {{ isset($roi) && $roi->receipts ? $roi->receipts->count() : 0 }};
 
                                 document.getElementById('add-receipt-btn').addEventListener('click', function() {
                                     const container = document.getElementById('receipts-container');
-
                                     const receiptItem = document.createElement('div');
                                     receiptItem.className = 'receipt-item mb-3';
                                     receiptItem.dataset.index = receiptIndex;
-
-                                    receiptItem.innerHTML = `
-            <div class="border rounded-3 p-3 bg-white position-relative">
-                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-receipt">
-                    <i class="fas fa-times"></i>
-                </button>
-                
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <label class="form-control-label">{{ __('Receipt Image') }}</label>
-                        <input 
-                            class="form-control" 
-                            type="file" 
-                            name="receipt_images[${receiptIndex}]"
-                            accept="image/*,application/pdf"
-                            required
-                        >
-                        <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Supported formats: JPG, PNG, PDF
-                        </small>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-control-label">{{ __('Receipt Month') }}</label>
-                        <input 
-                            class="form-control" 
-                            type="month" 
-                            name="receipt_dates[${receiptIndex}]"
-                            required
-                        >
-                    </div>
-                </div>
-            </div>
-        `;
+                                    receiptItem.innerHTML = createReceiptTemplate(receiptIndex);
 
                                     container.appendChild(receiptItem);
                                     receiptIndex++;
 
-                                    // Add remove functionality
                                     receiptItem.querySelector('.remove-receipt').addEventListener('click', function() {
                                         receiptItem.remove();
                                     });
                                 });
 
-                                // Add remove functionality to existing receipts
                                 document.querySelectorAll('.remove-receipt').forEach(button => {
                                     button.addEventListener('click', function() {
                                         if (confirm('Are you sure you want to remove this receipt?')) {
